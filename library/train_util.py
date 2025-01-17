@@ -4502,16 +4502,6 @@ def get_scheduler_fix(args, optimizer: Optimizer, num_processes: int):
             optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=num_training_steps, power=power, **lr_scheduler_kwargs
         )
 
-    if name == SchedulerType.COSINE_WITH_MIN_LR:
-        return schedule_func(
-            optimizer,
-            num_warmup_steps=num_warmup_steps,
-            num_training_steps=num_training_steps,
-            num_cycles=num_cycles / 2,
-            min_lr_rate=min_lr_ratio,
-            **lr_scheduler_kwargs,
-        )
-
     # these schedulers do not require `num_decay_steps`
     if name == SchedulerType.LINEAR or name == SchedulerType.COSINE:
         return schedule_func(

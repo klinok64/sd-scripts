@@ -150,6 +150,14 @@ def _load_state_dict_on_device(model, state_dict, device, dtype=None):
     missing_keys = list(model.state_dict().keys() - state_dict.keys())
     unexpected_keys = list(state_dict.keys() - model.state_dict().keys())
 
+    # check if key mismatch is due to transformer compatability and fix
+    if "text_model.embeddings.position_ids" in missing_keys and len(missing_keys) == 1:
+        missing_keys = {}
+        print("text_model.embeddings.position_ids key removed from model.state_dict")
+    if "text_model.embeddings.position_ids" in unexpected_keys:
+        state_dict.pop("text_model.embeddings.position_ids")
+        print("text_model.embeddings.position_ids key removed from state_dict")
+    
     # similar to model.load_state_dict()
     if not missing_keys and not unexpected_keys:
         for k in list(state_dict.keys()):
@@ -269,6 +277,7 @@ def load_models_from_sdxl_checkpoint(model_version, ckpt_path, map_location, dty
             te1_sd[k.replace("conditioner.embedders.0.transformer.", "")] = state_dict.pop(k)
         elif k.startswith("conditioner.embedders.1.model."):
             te2_sd[k] = state_dict.pop(k)
+
 
     # 最新の transformers では position_ids を含むとエラーになるので削除 / remove position_ids for latest transformers
     if "text_model.embeddings.position_ids" in te1_sd:
