@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def main(file):
-    print(f"loading: {file}")
+    logger.info(f"loading: {file}")
     if os.path.splitext(file)[1] == ".safetensors":
         sd = load_file(file)
     else:

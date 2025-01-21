@@ -14,7 +14,7 @@ def canny(args):
   # canny_img = 255 - canny_img
 
   cv2.imwrite(args.output, canny_img)
-  print("done!")
+  logger.info("done!")
 
 
 def setup_parser() -> argparse.ArgumentParser:

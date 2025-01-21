@@ -250,7 +250,7 @@ def create_network_from_weights(multiplier, file, vae, text_encoder, unet, weigh
         elif "lora_down" in key:
             dim = value.size()[0]
             modules_dim[lora_name] = dim
-            # print(f"{lora_name} {value.size()} {dim}")
+            # logger.info(f"{lora_name} {value.size()} {dim}")
 
     # support old LoRA without alpha
     for key in modules_dim.keys():
@@ -298,11 +298,11 @@ class DyLoRANetwork(torch.nn.Module):
         self.loraplus_text_encoder_lr_ratio = None
 
         if modules_dim is not None:
-            print("create LoRA network from weights")
+            logger.info("create LoRA network from weights")
         else:
-            print(f"create LoRA network. base dim (rank): {lora_dim}, alpha: {alpha}, unit: {unit}")
+            logger.info(f"create LoRA network. base dim (rank): {lora_dim}, alpha: {alpha}, unit: {unit}")
             if self.apply_to_conv:
-                print("apply LoRA to Conv2d with kernel size (3,3).")
+                logger.info("apply LoRA to Conv2d with kernel size (3,3).")
 
         # create module instances
         def create_modules(is_unet, root_module: torch.nn.Module, target_replace_modules) -> List[DyLoRAModule]:
@@ -344,21 +344,16 @@ class DyLoRANetwork(torch.nn.Module):
         for i, text_encoder in enumerate(text_encoders):
             if len(text_encoders) > 1:
                 index = i + 1
-                print(f"create LoRA for Text Encoder {index}")
+                logger.info(f"create LoRA for Text Encoder {index}")
             else:
                 index = None
-<<<<<<< HEAD
                 logger.info("create LoRA for Text Encoder")
 
-=======
-                print("create LoRA for Text Encoder")
-            
->>>>>>> 93da6c3 (replace all logger prints with regular prints)
             text_encoder_loras = create_modules(False, text_encoder, DyLoRANetwork.TEXT_ENCODER_TARGET_REPLACE_MODULE)
             self.text_encoder_loras.extend(text_encoder_loras)
 
         # self.text_encoder_loras = create_modules(False, text_encoder, DyLoRANetwork.TEXT_ENCODER_TARGET_REPLACE_MODULE)
-        print(f"create LoRA for Text Encoder: {len(self.text_encoder_loras)} modules.")
+        logger.info(f"create LoRA for Text Encoder: {len(self.text_encoder_loras)} modules.")
 
         # extend U-Net target modules if conv2d 3x3 is enabled, or load from weights
         target_modules = DyLoRANetwork.UNET_TARGET_REPLACE_MODULE
@@ -366,7 +361,7 @@ class DyLoRANetwork(torch.nn.Module):
             target_modules += DyLoRANetwork.UNET_TARGET_REPLACE_MODULE_CONV2D_3X3
 
         self.unet_loras = create_modules(True, unet, target_modules)
-        print(f"create LoRA for U-Net: {len(self.unet_loras)} modules.")
+        logger.info(f"create LoRA for U-Net: {len(self.unet_loras)} modules.")
 
     def set_loraplus_lr_ratio(self, loraplus_lr_ratio, loraplus_unet_lr_ratio, loraplus_text_encoder_lr_ratio):
         self.loraplus_lr_ratio = loraplus_lr_ratio
@@ -394,12 +389,12 @@ class DyLoRANetwork(torch.nn.Module):
 
     def apply_to(self, text_encoder, unet, apply_text_encoder=True, apply_unet=True):
         if apply_text_encoder:
-            print("enable LoRA for text encoder")
+            logger.info("enable LoRA for text encoder")
         else:
             self.text_encoder_loras = []
 
         if apply_unet:
-            print("enable LoRA for U-Net")
+            logger.info("enable LoRA for U-Net")
         else:
             self.unet_loras = []
 
@@ -417,12 +412,12 @@ class DyLoRANetwork(torch.nn.Module):
                 apply_unet = True
 
         if apply_text_encoder:
-            print("enable LoRA for text encoder")
+            logger.info("enable LoRA for text encoder")
         else:
             self.text_encoder_loras = []
 
         if apply_unet:
-            print("enable LoRA for U-Net")
+            logger.info("enable LoRA for U-Net")
         else:
             self.unet_loras = []
 
@@ -433,7 +428,7 @@ class DyLoRANetwork(torch.nn.Module):
                     sd_for_lora[key[len(lora.lora_name) + 1 :]] = weights_sd[key]
             lora.merge_to(sd_for_lora, dtype, device)
 
-        print(f"weights are merged")
+        logger.info(f"weights are merged")
     """
 
     # 二つのText Encoderに別々の学習率を設定できるようにするといいかも
